@@ -1,12 +1,10 @@
 ## Design Project 2: Omega Group
 
-You can use the [editor on GitHub](https://github.com/BopItProjectOmega/omega.github.io/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This is where some markdown text can go.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Current problem: how to convert page into a slide show? 
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Markdown Key
 
 ```markdown
 Syntax highlighted code block
