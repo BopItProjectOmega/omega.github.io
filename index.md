@@ -23,3 +23,6 @@ Syntax highlighted code block
 
 [Link](url) and ![Image](src)
 ```
+----
+
+This should be on a new slide
