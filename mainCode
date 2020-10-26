@@ -1,0 +1,237 @@
+/*
+ * Omega BopIt Project
+ * Greg Wagonblast, Ben Tanay, Brian Bianchi
+ * This is the main file used for programming the microcontrollor
+ * 
+ */
+
+#include "LedControl.h"
+#include "Time.h"
+#define joyX A0
+#define joyY A1
+
+// Define an LED display object
+LedControl mydisplay = LedControl(4, 2, 3, 1);
+
+// Global variables
+unsigned int count = 0;
+unsigned int millisecondsForInput = 20000;
+unsigned int score = 0;
+
+
+void setup() {
+  // Set serial frequency
+  Serial.begin(9600);
+
+  // Initialize pins for input and output
+  // Output pins are for the LED's for the Joystick device
+  // Input pin is for the button to start a new game
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, INPUT);
+
+  // setup Display
+  mydisplay.shutdown(0, false);  
+  mydisplay.setIntensity(0, 4); // 15 = brightest 
+
+  // Get Sccore in BCD and set display to starting screen
+  score = HexToBCD(count);
+  mydisplay.setChar(0, 7, 'b', false);
+  mydisplay.setChar(0, 6, '0', false);
+  mydisplay.setChar(0, 5, 'p', false);
+  mydisplay.setChar(0, 4, ' ', false);
+  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
+  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+  mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+  mydisplay.setDigit(0, 0, (score&0x0F), false);
+  
+  //wait for button press to start game
+  while(digitalRead(13) == LOW){
+    
+  }
+
+}
+
+// main loop
+void loop() {
+
+  /*
+   * For team: Here we'll have to find a way to randomly select an input for the user
+   * As of right now, the joystick is the only one. We also need to adjust the time
+   * reduction
+   */
+  // Call joystick function and pass in the time
+  getJoyStickAndScore(millisecondsForInput);
+
+  // If the timer is above 2s, decrease by 1 second for every level passed
+  if(millisecondsForInput/1000 > 2){
+    millisecondsForInput = millisecondsForInput - 1000;
+  }
+
+}
+
+
+// This function converts decimal to BCD for the display
+unsigned int HexToBCD(unsigned int number){
+  unsigned char i = 0;
+  unsigned int k = 0;
+  
+  while(number){
+      k = (k) | ((number%10) << i*4);
+      number = number / 10;
+      i++;
+    }
+  return(k);
+}
+
+
+// This is the heart of the joystick input
+void getJoyStickAndScore(int timer){
+
+   // Randomly get a number between 1 and 4 to select an LED
+   int whichLED = random(1,5);
+   int givenTime = timer;
+
+   // Boolean for assessing whether user passed
+   bool passed = true;
+
+   // First LED. All LED paths are similair. The difference is which x and y axis values are tested for correctness
+   if(whichLED == 1){
+
+     // Make LED high
+     digitalWrite(9, HIGH);
+
+     // While the user hasn't moved the joystick, decrease timer. The resting x and y axis value for each is 512. I give
+     // a bit of a deadzone to decrease sensitivity. It takes time to read the joystick, therefore no delay is needed. If
+     // timer gets to zero, they fail.
+     while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
+        updateScore(timer);
+        timer= timer-2;
+     }
+
+     // Store x and y values since they're constantly changing
+     int xAxis = analogRead(joyX);
+     int yAxis = analogRead(joyY);
+
+     // If joystick is in correct quadrant, the user was successful
+     if(xAxis <= 482 && yAxis < 560 && yAxis > 460 && timer != 0){
+        count++;
+     }else{
+      // User failed, set passed to false
+      passed = false;
+     }
+
+     // Set LED low, update score and delay.
+     digitalWrite(9, LOW);
+     updateScore(timer);
+     delay(1000);
+   }
+
+   if(whichLED == 2){
+     digitalWrite(10, HIGH);
+
+     while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
+        updateScore(timer);
+        //delay(.1);
+        timer= timer-2;
+     }
+     int xAxis = analogRead(joyX);
+     int yAxis = analogRead(joyY);
+     if(xAxis >= 542 && yAxis < 560 && yAxis > 460){
+        count++;
+     }else{
+      passed = false;
+     }
+     digitalWrite(10, LOW);
+     updateScore(timer);
+     delay(1000);
+   }
+
+   if(whichLED == 3){
+     digitalWrite(11, HIGH);
+     while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
+        updateScore(timer);
+        timer= timer-2;
+     }
+     int xAxis = analogRead(joyX);
+     int yAxis = analogRead(joyY);
+     if(yAxis >= 542 && xAxis < 560 && xAxis > 460){
+        count++;
+     }else{
+      passed = false;
+     }
+     digitalWrite(11, LOW);
+     updateScore(timer);
+     delay(1000);
+   }
+
+   if(whichLED == 4){
+     digitalWrite(12, HIGH);
+     while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
+        updateScore(timer);
+        timer= timer-2;
+     }
+     int xAxis = analogRead(joyX);
+     int yAxis = analogRead(joyY);
+     if(yAxis <= 482 && xAxis < 560 && xAxis > 460){
+        count++;
+     }else{
+      passed = false;
+     }
+     digitalWrite(12, LOW);
+     updateScore(timer);
+     delay(1000);
+   }
+
+  // User failed, calls endgame function
+  if(passed == false){
+    endGame();
+  }
+   
+}
+
+// This function updates the score and time remaining for the challenge
+void updateScore(int timeleft){
+
+  // Get score in BCD and convert time left to seconds
+  score = HexToBCD(count);
+  timeleft = HexToBCD(timeleft/1000);
+
+  // Output on display
+  mydisplay.setDigit(0, 7, ((timeleft>>4)&0x0F), false);
+  mydisplay.setDigit(0, 6, (timeleft&0x0F), false);
+  mydisplay.setChar(0, 5, ' ', false);
+  mydisplay.setChar(0, 4, ' ', false);
+  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
+  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+  mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+  mydisplay.setDigit(0, 0, (score&0x0F), false);
+}
+
+// End game. This gets called when the user fails
+void endGame(){
+
+  // Update score, timer, and display to end game screen
+  score = HexToBCD(count);
+  millisecondsForInput = 20000;
+  mydisplay.setChar(0, 7, 'e', false);
+  mydisplay.setChar(0, 6, 'n', false);
+  mydisplay.setChar(0, 5, 'd', false);
+  mydisplay.setChar(0, 4, ' ', false);
+  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
+  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+  mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+  mydisplay.setDigit(0, 0, (score&0x0F), false);
+
+  //wait for button press to start game
+  while(digitalRead(13) == LOW){
+    
+  }
+
+  // Reset count and screen. Proceed back to loop
+  count = 0;
+  updateScore(millisecondsForInput);
+  loop();
+}
