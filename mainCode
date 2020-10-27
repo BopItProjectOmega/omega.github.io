@@ -15,8 +15,9 @@ LedControl mydisplay = LedControl(4, 2, 3, 1);
 
 // Global variables
 unsigned int count = 0;
-unsigned int millisecondsForInput = 20000;
+unsigned int millisecondsForInput = 10000;
 unsigned int score = 0;
+unsigned int levelsPassed = 0;
 
 
 void setup() {
@@ -59,15 +60,17 @@ void loop() {
 
   /*
    * For team: Here we'll have to find a way to randomly select an input for the user
-   * As of right now, the joystick is the only one. We also need to adjust the time
-   * reduction
+   * As of right now, the joystick is the only one.
+   * 
    */
   // Call joystick function and pass in the time
   getJoyStickAndScore(millisecondsForInput);
-
-  // If the timer is above 2s, decrease by 1 second for every level passed
-  if(millisecondsForInput/1000 > 2){
+  levelsPassed++;
+  
+  // If the timer is above 1s and 5 levels have passed, decrease by 1 second for every level passed
+  if(millisecondsForInput/1000 > 1 && levelsPassed == 5){
     millisecondsForInput = millisecondsForInput - 1000;
+    levelsPassed = 0;
   }
 
 }
@@ -197,12 +200,12 @@ void updateScore(int timeleft){
 
   // Get score in BCD and convert time left to seconds
   score = HexToBCD(count);
-  timeleft = HexToBCD(timeleft/1000);
+  timeleft = HexToBCD(timeleft/100);
 
   // Output on display
-  mydisplay.setDigit(0, 7, ((timeleft>>4)&0x0F), false);
-  mydisplay.setDigit(0, 6, (timeleft&0x0F), false);
-  mydisplay.setChar(0, 5, ' ', false);
+  mydisplay.setDigit(0, 7, ((timeleft>>8)&0x0F), false);
+  mydisplay.setDigit(0, 6, ((timeleft>>4)&0x0F), false);
+  mydisplay.setDigit(0, 5, (timeleft&0x0F), false);
   mydisplay.setChar(0, 4, ' ', false);
   mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
   mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
@@ -215,7 +218,7 @@ void endGame(){
 
   // Update score, timer, and display to end game screen
   score = HexToBCD(count);
-  millisecondsForInput = 20000;
+  millisecondsForInput = 10000;
   mydisplay.setChar(0, 7, 'e', false);
   mydisplay.setChar(0, 6, 'n', false);
   mydisplay.setChar(0, 5, 'd', false);
