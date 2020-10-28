@@ -1,0 +1,28 @@
+#	Quantity	Seller #		Manufacturer #		Description		ID	PPU	Total	Order?
+
+-----------------------------------------------We Need-------------------------------------------------------------------------------------
+			SPARK FUN #
+1	2		COM-09151		COM-09151		SPEAKER 8OHM 500MW 	ghw3	2.25	4.50	Yes
+2	1		COM-09179		COM-09179		Pushbutton 33mm		ghw3	1.95	1.95	Yes
+3	1		COM-09181		COM-09181		Big Pushbutton		ghw3	11.95	11.95	Yes
+4	1		COM-16454		COM-16454		Piezo Siren		ghw3	6.95	6.95	Yes
+5	1		PRT-0009		PRT-0009		9V Snap Connector	ghw3	1.25	1.25	Yes
+6	1		PRT-09518		PRT-09518		9V Barrel Jack		ghw3	2.95	2.95	Yes
+7	1		PRT-10811		PRT-10811		DC Barrel Jack		ghw3	0.95	0.95	Yes
+8	4		PRT-10218		PRT-10218		9V Battery		ghw3	1.95	7.80	Yes
+9	1		SEN-10289		SEN-10289		Tilt Sensor		ghw3	1.95	1.95	Yes
+						AMAZON #
+10	1		LS0058 			LS0058 			Joysticks		ghw3	9.99	9.99	Yes
+11	1		28036 			28036 			Quad Tilt Sensor	ghw3	9.99	9.99	Yes
+-----------------------------------------------We Already Have----------------------------------------------------------------------------
+			DIGIKEY #
+12	1		CF14JT680RCT-ND		CF14JT680R		RES 680 OHM 1/4W 5% AXIAL		ghw3	0.1	0.1	No
+13	1		CF14JT10K0CT-ND		CF14JT10K0		RES 10K OHM 1/4W 5% AXIAL		ghw3	0.1	0.1	No
+14	1		987-1166-ND		91AR100KLF		THUMBWHEEL POT 100K OHM 0.5W TOP	ghw3	1.5	1.5	No
+15	1		BC1023CT-ND		K681J15C0GF5TL2		CAP CER 680PF 50V C0G/NP0 RADIAL	ghw3	0.29	0.29	No
+16	1		BC1080CT-ND		K223K15X7RF5TL2		CAP CER 0.022UF 50V X7R RADIAL		ghw3	0.26	0.26	No
+17	2		1189-1300-ND		35ZLH100MEFC6.3X11	CAP ALUM 100UF 20% 35V RADIAL		ghw3	0.3	0.6	No
+18	1		4143PHBK-ND		MAL211817471E3		CAP ALUM 470UF 20% 40V AXIAL		ghw3	3.46	3.46	No
+19	1		296-21753-5-ND		NA555P			IC OSC SINGLE TIMER 100KHZ 8-DIP	ghw3	0.45	0.45	No
+20      LEDS
+21      Extra Cpacitors Resistors
