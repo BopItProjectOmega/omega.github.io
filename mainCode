@@ -1,7 +1,3 @@
-/*
- * Omega BopIt Project
- * Greg Wagonblast, Ben Tanay, Brian Bianchi
- * This is the main file used for programming the microcontrollor
  * 
  */
 
@@ -18,6 +14,7 @@ unsigned int count = 0;
 unsigned int millisecondsForInput = 10000;
 unsigned int score = 0;
 unsigned int levelsPassed = 0;
+long randNumber;
 
 
 void setup() {
@@ -33,6 +30,25 @@ void setup() {
   pinMode(12, OUTPUT);
   pinMode(13, INPUT);
 
+  /*
+  // Initialize pin for power button as input
+  pinMode(pin, INPUT);
+  
+  // When power button is flipped on, fall into this case
+  if(pin == HIGH){
+    // Initialize start up audio sequence
+    // Paramaters for tone are tone(digital pin, frequency)
+    tone(3,20);
+    delay(200);
+    tone(3,1000);
+    delay(200);
+    tone(3,5000);
+    delay(200);
+    // Use noTone function to stop audio output
+    noTone(3);
+  }
+  */
+  
   // setup Display
   mydisplay.shutdown(0, false);  
   mydisplay.setIntensity(0, 4); // 15 = brightest 
@@ -53,6 +69,22 @@ void setup() {
     
   }
 
+  /*
+  // When power button is flipped off, fall into this case
+  // This probably won't work because we're cuttin the power off
+  if(pin == LOW){
+    // Initialize shut down audio sequence
+    // Paramaters for tone are tone(digital pin, frequency)
+    tone(3,5000);
+    delay(200);
+    tone(3,1000);
+    delay(200);
+    tone(3,20);
+    delay(200);
+    // Use noTone function to stop audio output
+    noTone(3);
+  }
+  */
 }
 
 // main loop
@@ -238,3 +270,28 @@ void endGame(){
   updateScore(millisecondsForInput);
   loop();
 }
+
+
+/*
+// This is the pseudo random audio/task generator, tasks need to be integrated
+// If y'all have a better idea we can scrap this
+for(int i = 0; i < 100; i++){
+  // randNumber from 0 - 99
+  randNumber = random(100);
+    if(randNumber%3 == 0){
+      tone(3,20);
+      delay(200);
+      noTone(3);
+    }
+    else if(randNumber%3 == 1){
+      tone(3,1000);
+      delay(200);
+      noTone(3);
+    }
+    else{
+      tone(3,5000);
+      delay(200);
+      noTone(3);
+    }
+  }
+  */
