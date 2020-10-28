@@ -39,14 +39,14 @@ void setup() {
 
   // Get Sccore in BCD and set display to starting screen
   score = HexToBCD(count);
-  mydisplay.setChar(0, 7, 'b', false);
-  mydisplay.setChar(0, 6, '0', false);
-  mydisplay.setChar(0, 5, 'p', false);
-  mydisplay.setChar(0, 4, ' ', false);
-  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
-  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
-  mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
-  mydisplay.setDigit(0, 0, (score&0x0F), false);
+  mydisplay.setChar(0, 7, ' ', false);
+  mydisplay.setChar(0, 6, ' ', false);
+  mydisplay.setChar(0, 5, 'P', false);
+  mydisplay.setChar(0, 4, 'l', false);
+  mydisplay.setChar(0, 3, 'a', false);
+  mydisplay.setRow(0, 2, B0111011); // makes the letter Y
+  mydisplay.setChar(0, 1, ' ', false);
+  mydisplay.setChar(0, 0, ' ', false);
 
   // Seed random variables with unconnected A3 pin. This seeds the random variable using the 
   // noise from the unconnected pin.
@@ -60,7 +60,7 @@ void setup() {
   while(digitalRead(13) == HIGH){
     
   }
-
+  
 }
 
 // main loop
@@ -73,6 +73,7 @@ void loop() {
   while(digitalRead(13) == HIGH || analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
     
   }
+  delay(100);
 
   // call whichever number was selected
   if(whichFunction == 1 ){ 
@@ -283,12 +284,12 @@ void updateScore(int timeleft){
   timeleft = HexToBCD(timeleft/100);
 
   // Output on display
-  mydisplay.setDigit(0, 7, ((timeleft>>8)&0x0F), false);
-  mydisplay.setDigit(0, 6, ((timeleft>>4)&0x0F), false);
-  mydisplay.setDigit(0, 5, (timeleft&0x0F), false);
-  mydisplay.setChar(0, 4, ' ', false);
-  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
-  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+  mydisplay.setChar(0, 7, ' ', false);
+  mydisplay.setChar(0, 6, ' ', false);
+  mydisplay.setDigit(0, 5, ((timeleft>>4)&0x0F), false);
+  mydisplay.setDigit(0, 4, (timeleft&0x0F), false);
+  mydisplay.setChar(0, 3, ' ', false);
+  mydisplay.setChar(0, 2, ' ', false);
   mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
   mydisplay.setDigit(0, 0, (score&0x0F), false);
 }
@@ -299,12 +300,12 @@ void endGame(){
   // Update score, timer, and display to end game screen
   score = HexToBCD(count);
   millisecondsForInput = 10000;
-  mydisplay.setChar(0, 7, 'e', false);
-  mydisplay.setChar(0, 6, 'n', false);
-  mydisplay.setChar(0, 5, 'd', false);
-  mydisplay.setChar(0, 4, ' ', false);
-  mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
-  mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+  mydisplay.setChar(0, 7, ' ', false);
+  mydisplay.setChar(0, 6, ' ', false);
+  mydisplay.setChar(0, 5, 'e', false);
+  mydisplay.setChar(0, 4, 'n', false);
+  mydisplay.setChar(0, 3, 'd', false);
+  mydisplay.setChar(0, 2, ' ', false);
   mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
   mydisplay.setDigit(0, 0, (score&0x0F), false);
 
@@ -332,8 +333,8 @@ void winner(){
     mydisplay.setChar(0, 6, ' ', false);
     mydisplay.setChar(0, 5, ' ', false);
     mydisplay.setChar(0, 4, ' ', false);
-    mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
-    mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+    mydisplay.setChar(0, 3, ' ', false);
+    mydisplay.setChar(0, 2, ' ', false);
     mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
     mydisplay.setDigit(0, 0, (score&0x0F), false);
     delay(1000);
@@ -341,8 +342,8 @@ void winner(){
     mydisplay.setChar(0, 6, '0', false);
     mydisplay.setChar(0, 5, 'p', false);
     mydisplay.setChar(0, 4, ' ', false);
-    mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
-    mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+    mydisplay.setChar(0, 3, ' ', false);
+    mydisplay.setChar(0, 2, ' ', false);
     mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
     mydisplay.setDigit(0, 0, (score&0x0F), false);
     delay(1000);
