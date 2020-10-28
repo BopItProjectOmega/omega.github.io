@@ -1,7 +1,7 @@
 /*
  * Omega BopIt Project
  * Greg Wagonblast, Ben Tanay, Brian Bianchi
- * This is the main file used for programming the microcontrollor
+ * This is the main file used for programming the microcontrollor.
  * 
  */
 
@@ -47,9 +47,17 @@ void setup() {
   mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
   mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
   mydisplay.setDigit(0, 0, (score&0x0F), false);
+
+  // Seed random variables with unconnected A3 pin. This seeds the random variable using the 
+  // noise from the unconnected pin.
+  randomSeed(analogRead(A3));
   
   //wait for button press to start game
   while(digitalRead(13) == LOW){
+    
+  }
+  // this loop is used to ensure button press does not carry over into game
+  while(digitalRead(13) == HIGH){
     
   }
 
@@ -58,19 +66,41 @@ void setup() {
 // main loop
 void loop() {
 
-  /*
-   * For team: Here we'll have to find a way to randomly select an input for the user
-   * As of right now, the joystick is the only one.
-   * 
-   */
-  // Call joystick function and pass in the time
-  getJoyStickAndScore(millisecondsForInput);
+  // Get desired input using a random variable
+  int whichFunction = random(1,4);
+
+  // this loop is used to ensure inputs do not carry over into game
+  while(digitalRead(13) == HIGH || analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
+    
+  }
+
+  // call whichever number was selected
+  if(whichFunction == 1 ){ 
+    // Call joystick function and pass in the time
+    // TEAM: add noise
+    getJoyStickAndScore(millisecondsForInput);
+  }else if(whichFunction == 2 || whichFunction == 3){ // 3 is here just for now because tilt is not implemented
+    // TEAM: add noise
+    getButtonAndScore(millisecondsForInput);
+  }//else if(){
+    // TEAM: add noise
+    // getTiltAndScore(millisecondsForInput);
+  //} else{
+    // endGame();
+  //}
+
+  // TEAM: add noise
   levelsPassed++;
   
   // If the timer is above 1s and 5 levels have passed, decrease by 1 second for every level passed
-  if(millisecondsForInput/1000 > 1 && levelsPassed == 5){
+  if(millisecondsForInput/1000 > 1 && levelsPassed == 10){
     millisecondsForInput = millisecondsForInput - 1000;
     levelsPassed = 0;
+  }
+
+  // user has won game if levels equal 99
+  if(count == 99){
+    winner();
   }
 
 }
@@ -112,6 +142,10 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
+        if(digitalRead(13) == HIGH){
+          passed = false;
+          timer = 0;
+        }
      }
 
      // Store x and y values since they're constantly changing
@@ -119,7 +153,7 @@ void getJoyStickAndScore(int timer){
      int yAxis = analogRead(joyY);
 
      // If joystick is in correct quadrant, the user was successful
-     if(xAxis <= 482 && yAxis < 560 && yAxis > 460 && timer != 0){
+     if(xAxis <= 482 && yAxis <= 560 && yAxis >= 460 && timer != 0){
         count++;
      }else{
       // User failed, set passed to false
@@ -137,12 +171,15 @@ void getJoyStickAndScore(int timer){
 
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
-        //delay(.1);
         timer= timer-2;
+        if(digitalRead(13) == HIGH){
+          passed = false;
+          timer = 0;
+        }
      }
      int xAxis = analogRead(joyX);
      int yAxis = analogRead(joyY);
-     if(xAxis >= 542 && yAxis < 560 && yAxis > 460){
+     if(xAxis >= 542 && yAxis <= 560 && yAxis >= 460 && timer != 0){
         count++;
      }else{
       passed = false;
@@ -157,10 +194,14 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
+        if(digitalRead(13) == HIGH){
+          passed = false;
+          timer = 0;
+        }
      }
      int xAxis = analogRead(joyX);
      int yAxis = analogRead(joyY);
-     if(yAxis >= 542 && xAxis < 560 && xAxis > 460){
+     if(yAxis >= 542 && xAxis <= 560 && xAxis >= 460 && timer != 0){
         count++;
      }else{
       passed = false;
@@ -175,10 +216,14 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
+        if(digitalRead(13) == HIGH){
+          passed = false;
+          timer = 0;
+        }
      }
      int xAxis = analogRead(joyX);
      int yAxis = analogRead(joyY);
-     if(yAxis <= 482 && xAxis < 560 && xAxis > 460){
+     if(yAxis <= 482 && xAxis <= 560 && xAxis >= 460 && timer != 0){
         count++;
      }else{
       passed = false;
@@ -194,6 +239,41 @@ void getJoyStickAndScore(int timer){
   }
    
 }
+
+// this function gets the button input and updates score
+void getButtonAndScore(int givenTime){
+  // boolean variable to indicate if other inputs were detected
+  bool wrongInput = false;
+  
+  //wait for button press to start game
+  while(digitalRead(13) == LOW && givenTime > 0){
+    updateScore(givenTime);
+    givenTime = givenTime - 2;
+    if(analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
+      wrongInput == true;
+      givenTime = 0;
+    }
+  }
+
+  // User failed, calls endgame function
+  if(givenTime <= 0 || wrongInput == true){
+    endGame();
+  }else{
+    count++;
+    updateScore(givenTime);
+    delay(1000);
+  }
+
+}
+
+// TEAM: tilt function
+// getTiltAndScore(int givenTime){
+
+
+
+
+
+// }
 
 // This function updates the score and time remaining for the challenge
 void updateScore(int timeleft){
@@ -232,6 +312,42 @@ void endGame(){
   while(digitalRead(13) == LOW){
     
   }
+
+  // Reset count and screen. Proceed back to loop
+  count = 0;
+  updateScore(millisecondsForInput);
+  loop();
+}
+
+
+// End game for winner. This gets called when the user wins
+void winner(){
+
+  // Update score, timer, and display to end game winner screen
+  score = HexToBCD(count);
+  millisecondsForInput = 10000;
+
+  while(digitalRead(13) == LOW){
+    mydisplay.setChar(0, 7, ' ', false);
+    mydisplay.setChar(0, 6, ' ', false);
+    mydisplay.setChar(0, 5, ' ', false);
+    mydisplay.setChar(0, 4, ' ', false);
+    mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
+    mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+    mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+    mydisplay.setDigit(0, 0, (score&0x0F), false);
+    delay(1000);
+    mydisplay.setChar(0, 7, 'b', false);
+    mydisplay.setChar(0, 6, '0', false);
+    mydisplay.setChar(0, 5, 'p', false);
+    mydisplay.setChar(0, 4, ' ', false);
+    mydisplay.setDigit(0, 3, ((score>>12)&0x0F), false);
+    mydisplay.setDigit(0, 2, ((score>>8)&0x0F), false);
+    mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+    mydisplay.setDigit(0, 0, (score&0x0F), false);
+    delay(1000);
+  }
+
 
   // Reset count and screen. Proceed back to loop
   count = 0;
