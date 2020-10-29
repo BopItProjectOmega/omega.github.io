@@ -14,7 +14,7 @@
 LedControl mydisplay = LedControl(4, 2, 3, 1);
 
 // Global variables
-unsigned int count = 0;
+unsigned int count = 98;
 unsigned int millisecondsForInput = 10000;
 unsigned int score = 0;
 unsigned int levelsPassed = 0;
@@ -33,7 +33,7 @@ void setup() {
   pinMode(12, OUTPUT);
   pinMode(13, INPUT);
 
-  // setup Display
+  // Setup Display
   mydisplay.shutdown(0, false);  
   mydisplay.setIntensity(0, 4); // 15 = brightest 
 
@@ -51,12 +51,26 @@ void setup() {
   // Seed random variables with unconnected A3 pin. This seeds the random variable using the 
   // noise from the unconnected pin.
   randomSeed(analogRead(A3));
-  
-  //wait for button press to start game
+
+  // Play a little melody
+  for(int i = 1; i < 3; i++){
+    tone(8,650,150);
+    delay(300);
+    tone(8,380,100);
+    delay(150);
+    tone(8,430,100);
+    delay(150);
+   }
+  tone(8,650,150);
+  delay(300);
+  tone(8,750,150);
+  delay(300);
+
+  // Wait for button press to start game
   while(digitalRead(13) == LOW){
-    
+ 
   }
-  // this loop is used to ensure button press does not carry over into game
+  // This loop is used to ensure button press does not carry over into game
   while(digitalRead(13) == HIGH){
     
   }
@@ -67,30 +81,39 @@ void setup() {
 void loop() {
 
   // Get desired input using a random variable
-  int whichFunction = random(1,4);
+  int whichFunction = random(1,3);
 
-  // this loop is used to ensure inputs do not carry over into game
+  // This loop is used to ensure inputs do not carry over into game
   while(digitalRead(13) == HIGH || analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
-    
+    if(count == 9 && analogRead(joyY) > 542 && digitalRead(13) == HIGH){
+      easterEggTone();
+    }
   }
   delay(100);
 
-  // call whichever number was selected
+  // Call whichever number was selected
   if(whichFunction == 1 ){ 
-    // Call joystick function and pass in the time
-    // TEAM: add noise
+    // Call joystick function and play audio
+    tone(8,300,260);
+    delay(350);
+    noTone(8);
     getJoyStickAndScore(millisecondsForInput);
   }else if(whichFunction == 2 || whichFunction == 3){ // 3 is here just for now because tilt is not implemented
-    // TEAM: add noise
+    // Call button function and play audio
+    tone(8,565,260);
+    delay(350);
+    noTone(8);
     getButtonAndScore(millisecondsForInput);
   }//else if(){
-    // TEAM: add noise
+    //tone(8,825,260);
+    //delay(350);
+    //noTone(8);
     // getTiltAndScore(millisecondsForInput);
   //} else{
     // endGame();
   //}
 
-  // TEAM: add noise
+  // Level passed
   levelsPassed++;
   
   // If the timer is above 1s and 5 levels have passed, decrease by 1 second for every level passed
@@ -99,7 +122,7 @@ void loop() {
     levelsPassed = 0;
   }
 
-  // user has won game if levels equal 99
+  // User has won game if levels equal 99
   if(count == 99){
     winner();
   }
@@ -241,12 +264,20 @@ void getJoyStickAndScore(int timer){
    
 }
 
-// this function gets the button input and updates score
+// This function gets the button input and updates score
 void getButtonAndScore(int givenTime){
+  
+  // If score is above 50, random LEDs light up to throw user off
+  // Randomly get a number to turn on LED
+  int ledTrap = random(9,15);
+  if(count > 50 && ledTrap > 8 && ledTrap < 13){
+    digitalWrite(ledTrap, HIGH);
+  }
+
   // boolean variable to indicate if other inputs were detected
   bool wrongInput = false;
   
-  //wait for button press to start game
+  // Wait for button press
   while(digitalRead(13) == LOW && givenTime > 0){
     updateScore(givenTime);
     givenTime = givenTime - 2;
@@ -256,6 +287,10 @@ void getButtonAndScore(int givenTime){
     }
   }
 
+  if(count > 50 && ledTrap > 8 && ledTrap < 13){
+    digitalWrite(ledTrap, LOW);
+  }
+  
   // User failed, calls endgame function
   if(givenTime <= 0 || wrongInput == true){
     endGame();
@@ -309,6 +344,16 @@ void endGame(){
   mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
   mydisplay.setDigit(0, 0, (score&0x0F), false);
 
+  tone(8,465,200);
+  delay(100);
+  tone(8,425,225);
+  delay(125);
+  tone(8,350,300);
+  delay(200);
+  tone(8,270,600);
+  delay(1550);
+
+  
   //wait for button press to start game
   while(digitalRead(13) == LOW){
     
@@ -328,25 +373,37 @@ void winner(){
   score = HexToBCD(count);
   millisecondsForInput = 10000;
 
+
+  mydisplay.setChar(0, 7, 'b', false);
+  mydisplay.setChar(0, 6, '0', false);
+  mydisplay.setChar(0, 5, 'p', false);
+  mydisplay.setChar(0, 4, ' ', false);
+  mydisplay.setChar(0, 3, ' ', false);
+  mydisplay.setChar(0, 2, ' ', false);
+  mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
+  mydisplay.setDigit(0, 0, (score&0x0F), false);
+    
+  // Play a little melody
+  for(int i = 10; i < 40; i = i + 10){
+    tone(8,650,150);
+    delay(300);
+    tone(8,380,100);
+    delay(150);
+    tone(8,430,100);
+    delay(150);
+   }
+  tone(8,650,150);
+  delay(300);
+  tone(8,750,150);
+  delay(300);
+  tone(8,1020,80);
+  delay(150);
+  tone(8,1020,80);
+  delay(300);
+
+  // Wait for button to restart
   while(digitalRead(13) == LOW){
-    mydisplay.setChar(0, 7, ' ', false);
-    mydisplay.setChar(0, 6, ' ', false);
-    mydisplay.setChar(0, 5, ' ', false);
-    mydisplay.setChar(0, 4, ' ', false);
-    mydisplay.setChar(0, 3, ' ', false);
-    mydisplay.setChar(0, 2, ' ', false);
-    mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
-    mydisplay.setDigit(0, 0, (score&0x0F), false);
-    delay(1000);
-    mydisplay.setChar(0, 7, 'b', false);
-    mydisplay.setChar(0, 6, '0', false);
-    mydisplay.setChar(0, 5, 'p', false);
-    mydisplay.setChar(0, 4, ' ', false);
-    mydisplay.setChar(0, 3, ' ', false);
-    mydisplay.setChar(0, 2, ' ', false);
-    mydisplay.setDigit(0, 1, ((score>>4)&0x0F), false);
-    mydisplay.setDigit(0, 0, (score&0x0F), false);
-    delay(1000);
+
   }
 
 
@@ -354,4 +411,359 @@ void winner(){
   count = 0;
   updateScore(millisecondsForInput);
   loop();
+}
+
+
+void easterEggTone(){
+  tone(8,660,100);
+  delay(150);
+  tone(8,660,100);
+  delay(300);
+  tone(8,660,100);
+  delay(300);
+  tone(8,510,100);
+  delay(100);
+  tone(8,660,100);
+  delay(300);
+  tone(8,770,100);
+  delay(550);
+  tone(8,380,100);
+  delay(575);
+  
+  tone(8,510,100);
+  delay(450);
+  tone(8,380,100);
+  delay(400);
+  tone(8,320,100);
+  delay(500);
+  tone(8,440,100);
+  delay(300);
+  tone(8,480,80);
+  delay(330);
+  tone(8,450,100);
+  delay(150);
+  tone(8,430,100);
+  delay(300);
+  tone(8,380,100);
+  delay(200);
+  tone(8,660,80);
+  delay(200);
+  tone(8,760,50);
+  delay(150);
+  tone(8,860,100);
+  delay(300);
+  tone(8,700,80);
+  delay(150);
+  tone(8,760,50);
+  delay(350);
+  tone(8,660,80);
+  delay(300);
+  tone(8,520,80);
+  delay(150);
+  tone(8,580,80);
+  delay(150);
+  tone(8,480,80);
+  delay(500);
+  
+  tone(8,510,100);
+  delay(450);
+  tone(8,380,100);
+  delay(400);
+  tone(8,320,100);
+  delay(500);
+  tone(8,440,100);
+  delay(300);
+  tone(8,480,80);
+  delay(330);
+  tone(8,450,100);
+  delay(150);
+  tone(8,430,100);
+  delay(300);
+  tone(8,380,100);
+  delay(200);
+  tone(8,660,80);
+  delay(200);
+  tone(8,760,50);
+  delay(150);
+  tone(8,860,100);
+  delay(300);
+  tone(8,700,80);
+  delay(150);
+  tone(8,760,50);
+  delay(350);
+  tone(8,660,80);
+  delay(300);
+  tone(8,520,80);
+  delay(150);
+  tone(8,580,80);
+  delay(150);
+  tone(8,480,80);
+  delay(500);
+  
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,150);
+  delay(300);
+  tone(8,380,100);
+  delay(150);
+  tone(8,430,100);
+  delay(150);
+  
+  tone(8,500,100);
+  delay(300);
+  tone(8,430,100);
+  delay(150);
+  tone(8,500,100);
+  delay(100);
+  tone(8,570,100);
+  delay(220);
+  
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,200);
+  delay(300);
+  
+  tone(8,1020,80);
+  delay(300);
+  tone(8,1020,80);
+  delay(150);
+  tone(8,1020,80);
+  delay(300);
+  
+  tone(8,380,100);
+  delay(300);
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,150);
+  delay(300);
+  tone(8,380,100);
+  delay(150);
+  tone(8,430,100);
+  delay(150);
+  
+  tone(8,500,100);
+  delay(300);
+  tone(8,430,100);
+  delay(150);
+  tone(8,500,100);
+  delay(100);
+  tone(8,570,100);
+  delay(420);
+  
+  tone(8,585,100);
+  delay(450);
+  
+  tone(8,550,100);
+  delay(420);
+  
+  tone(8,500,100);
+  delay(360);
+  
+  tone(8,380,100);
+  delay(300);
+  tone(8,500,100);
+  delay(300);
+  tone(8,500,100);
+  delay(150);
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,150);
+  delay(300);
+  tone(8,380,100);
+  delay(150);
+  tone(8,430,100);
+  delay(150);
+  
+  tone(8,500,100);
+  delay(300);
+  tone(8,430,100);
+  delay(150);
+  tone(8,500,100);
+  delay(100);
+  tone(8,570,100);
+  delay(220);
+  
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,200);
+  delay(300);
+  
+  tone(8,1020,80);
+  delay(300);
+  tone(8,1020,80);
+  delay(150);
+  tone(8,1020,80);
+  delay(300);
+  
+  tone(8,380,100);
+  delay(300);
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,760,100);
+  delay(100);
+  tone(8,720,100);
+  delay(150);
+  tone(8,680,100);
+  delay(150);
+  tone(8,620,150);
+  delay(300);
+  
+  tone(8,650,150);
+  delay(300);
+  tone(8,380,100);
+  delay(150);
+  tone(8,430,100);
+  delay(150);
+  
+  tone(8,500,100);
+  delay(300);
+  tone(8,430,100);
+  delay(150);
+  tone(8,500,100);
+  delay(100);
+  tone(8,570,100);
+  delay(420);
+  
+  tone(8,585,100);
+  delay(450);
+  
+  tone(8,550,100);
+  delay(420);
+  
+  tone(8,500,100);
+  delay(360);
+  
+  tone(8,380,100);
+  delay(300);
+  tone(8,500,100);
+  delay(300);
+  tone(8,500,100);
+  delay(150);
+  tone(8,500,100);
+  delay(300);
+  
+  tone(8,500,60);
+  delay(150);
+  tone(8,500,80);
+  delay(300);
+  tone(8,500,60);
+  delay(350);
+  tone(8,500,80);
+  delay(150);
+  tone(8,580,80);
+  delay(350);
+  tone(8,660,80);
+  delay(150);
+  tone(8,500,80);
+  delay(300);
+  tone(8,430,80);
+  delay(150);
+  tone(8,380,80);
+  delay(600);
+  
+  tone(8,500,60);
+  delay(150);
+  tone(8,500,80);
+  delay(300);
+  tone(8,500,60);
+  delay(350);
+  tone(8,500,80);
+  delay(150);
+  tone(8,580,80);
+  delay(150);
+  tone(8,660,80);
+  delay(550);
+  
+  tone(8,870,80);
+  delay(325);
+  tone(8,760,80);
+  delay(600);
+  
+  tone(8,500,60);
+  delay(150);
+  tone(8,500,80);
+  delay(300);
+  tone(8,500,60);
+  delay(350);
+  tone(8,500,80);
+  delay(150);
+  tone(8,580,80);
+  delay(350);
+  tone(8,660,80);
+  delay(150);
+  tone(8,500,80);
+  delay(300);
+  tone(8,430,80);
+  delay(150);
+  tone(8,380,80);
+  delay(600);
+  
+  tone(8,660,100);
+  delay(150);
+  tone(8,660,100);
+  delay(300);
+  tone(8,660,100);
+  delay(300);
+  tone(8,510,100);
+  delay(100);
+  tone(8,660,100);
+  delay(300);
+  tone(8,770,100);
+  delay(550);
+  tone(8,380,100);
+  delay(575);
 }
