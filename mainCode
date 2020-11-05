@@ -14,7 +14,7 @@
 LedControl mydisplay = LedControl(4, 2, 3, 1);
 
 // Global variables
-unsigned int count = 98;
+unsigned int count = 0;
 unsigned int millisecondsForInput = 10000;
 unsigned int score = 0;
 unsigned int levelsPassed = 0;
@@ -26,12 +26,13 @@ void setup() {
 
   // Initialize pins for input and output
   // Output pins are for the LED's for the Joystick device
-  // Input pin is for the button to start a new game
+  // Input pins is for the button to start a new game and tilt sensor
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
   pinMode(13, INPUT);
+  pinMode(7, INPUT);
 
   // Setup Display
   mydisplay.shutdown(0, false);  
@@ -81,7 +82,7 @@ void setup() {
 void loop() {
 
   // Get desired input using a random variable
-  int whichFunction = random(1,3);
+  int whichFunction = random(1,4);
 
   // This loop is used to ensure inputs do not carry over into game
   while(digitalRead(13) == HIGH || analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
@@ -98,20 +99,21 @@ void loop() {
     delay(350);
     noTone(8);
     getJoyStickAndScore(millisecondsForInput);
-  }else if(whichFunction == 2 || whichFunction == 3){ // 3 is here just for now because tilt is not implemented
+  }else if(whichFunction == 2){ 
     // Call button function and play audio
     tone(8,565,260);
     delay(350);
     noTone(8);
     getButtonAndScore(millisecondsForInput);
-  }//else if(){
-    //tone(8,825,260);
-    //delay(350);
-    //noTone(8);
-    // getTiltAndScore(millisecondsForInput);
-  //} else{
-    // endGame();
-  //}
+  }else if(whichFunction == 3){
+    // Call tilt function and play audio
+    tone(8,825,260);
+    delay(350);
+    noTone(8);
+    getTiltAndScore(millisecondsForInput);
+  } else{
+    endGame();
+  }
 
   // Level passed
   levelsPassed++;
@@ -151,6 +153,9 @@ void getJoyStickAndScore(int timer){
    int whichLED = random(1,5);
    int givenTime = timer;
 
+   // Get tilt status
+   bool tiltStatus = digitalRead(7);
+
    // Boolean for assessing whether user passed
    bool passed = true;
 
@@ -166,7 +171,7 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
-        if(digitalRead(13) == HIGH){
+        if(digitalRead(13) == HIGH || tiltStatus != digitalRead(7)){
           passed = false;
           timer = 0;
         }
@@ -196,7 +201,7 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
-        if(digitalRead(13) == HIGH){
+        if(digitalRead(13) == HIGH || tiltStatus != digitalRead(7)){
           passed = false;
           timer = 0;
         }
@@ -218,7 +223,7 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
-        if(digitalRead(13) == HIGH){
+        if(digitalRead(13) == HIGH || tiltStatus != digitalRead(7)){
           passed = false;
           timer = 0;
         }
@@ -240,7 +245,7 @@ void getJoyStickAndScore(int timer){
      while(analogRead(joyX) < 542 && analogRead(joyX) > 482 && analogRead(joyY) < 542 && analogRead(joyY) > 482 && timer != 0){
         updateScore(timer);
         timer= timer-2;
-        if(digitalRead(13) == HIGH){
+        if(digitalRead(13) == HIGH || tiltStatus != digitalRead(7)){
           passed = false;
           timer = 0;
         }
@@ -273,15 +278,18 @@ void getButtonAndScore(int givenTime){
   if(count > 50 && ledTrap > 8 && ledTrap < 13){
     digitalWrite(ledTrap, HIGH);
   }
+  
+  // Get tilt status
+  bool tiltStatus = digitalRead(7);
 
-  // boolean variable to indicate if other inputs were detected
+  // Boolean variable to indicate if other inputs were detected
   bool wrongInput = false;
   
   // Wait for button press
   while(digitalRead(13) == LOW && givenTime > 0){
     updateScore(givenTime);
     givenTime = givenTime - 2;
-    if(analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482){
+    if(analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482 || tiltStatus != digitalRead(7)){
       wrongInput == true;
       givenTime = 0;
     }
@@ -302,14 +310,32 @@ void getButtonAndScore(int givenTime){
 
 }
 
-// TEAM: tilt function
-// getTiltAndScore(int givenTime){
 
+void getTiltAndScore(int givenTime){
 
+  // Boolean variable to indicate if other inputs were detected
+  bool wrongInput = false;
+  
+  // Read tilt and wait for it to flip
+  bool tiltStatus = digitalRead(7);
+  while(tiltStatus == digitalRead(7) && givenTime > 0){
+    updateScore(givenTime);
+    givenTime = givenTime - 2;
+    if(analogRead(joyX) > 542 || analogRead(joyX) < 482 || analogRead(joyY) > 542 || analogRead(joyY) < 482 || digitalRead(13) == HIGH){
+      wrongInput == true;
+      givenTime = 0;
+    }
+  }
 
-
-
-// }
+  // If user passed, increment score and continue
+  if(givenTime > 0 && wrongInput == false){
+    count++;
+    updateScore(givenTime);
+    delay(1000);
+  }else{
+    endGame();
+  }
+ }
 
 // This function updates the score and time remaining for the challenge
 void updateScore(int timeleft){
@@ -384,7 +410,7 @@ void winner(){
   mydisplay.setDigit(0, 0, (score&0x0F), false);
     
   // Play a little melody
-  for(int i = 10; i < 40; i = i + 10){
+  for(int i = 1; i < 3; i++){
     tone(8,650,150);
     delay(300);
     tone(8,380,100);
